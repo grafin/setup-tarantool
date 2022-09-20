@@ -58211,9 +58211,14 @@ async function run_linux() {
         core.info('Caching APT packages: ' + dpkg_diff.join(', '));
         for (const pkg of dpkg_diff) {
             const output = await capture(`sudo dpkg -L ${pkg}`, { silent: true });
-            const files = output
-                .split('\n')
-                .filter(f => fs.statSync(f).isFile());
+            const files = output.split('\n').filter((f) => {
+                try {
+                    return fs.statSync(f).isFile();
+                }
+                catch (e) {
+                    return false;
+                }
+            });
             for (const f of files) {
                 const dest = path.join(cache_dir, path.dirname(f));
                 await io.mkdirP(dest);
