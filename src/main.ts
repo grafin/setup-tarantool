@@ -194,16 +194,25 @@ function list_files_in_dir(directory: string, files: string[] = []): string[] {
   return files
 }
 
+function dpkg_new_config(): DpkgConfig {
+  const dpkgConfig: DpkgConfig = {
+    excludes: [],
+    includes: []
+  }
+
+  // https://groups.google.com/g/linux.debian.bugs.dist/c/w5HiAxl7e7Y
+  dpkgConfig.excludes.push(glob_to_regex('/usr/share/man/man3/LIST_*.3'))
+
+  return dpkgConfig
+}
+
 function dpkg_read_config(): DpkgConfig {
   const dpkgConfigFilepath = '/etc/dpkg/dpkg.cfg'
   const dpkgConfigDirPath = '/etc/dpkg/dpkg.cfg.d'
 
   const configs = list_files_in_dir(dpkgConfigDirPath, [dpkgConfigFilepath])
 
-  const dpkgConfig: DpkgConfig = {
-    excludes: [],
-    includes: []
-  }
+  const dpkgConfig = dpkg_new_config()
 
   configs.forEach(config => {
     try {
